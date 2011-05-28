@@ -101,7 +101,6 @@ var ga4blogger = {
 					hash = "(" + ga4blogger.get_text(this) + ") " + hash;
 					window._gaq.push(['_trackEvent', 'Hash Link', ga4blogger.path, hash]);
 				});
-
 				if (ga4blogger.track_postview()) {
 					jQuery(ga4blogger_track_postview).appear(function() {
 						window._gaq.push(['_trackPageview', ga4blogger.str2link(jQuery(this).attr('href')).pathname]);
