@@ -1,7 +1,7 @@
 "use strict";
 
  var ga4blogger_ua = "UA-XXXXX-X";
- var ga4blogger_track_postview = "h2.title a";
+ var ga4blogger_track_postview = "h2.titleh a";
 
 /*!
  * ga4blogger
@@ -51,7 +51,11 @@ var ga4blogger = {
 	},
 
 	track_postview : function (){
-		return (window.ga4blogger_track_postview && ga4blogger.path === "/");
+		if (window.ga4blogger_track_postview && typeof window.ga4blogger_track_postview === "string") {
+			return true;
+		}
+		window.ga4blogger_track_postview = null;
+		return false;
 	},
 
 	load_ga : function () {
@@ -82,6 +86,17 @@ var ga4blogger = {
 			try {
 				ga4blogger.path = (ga4blogger.path === "/") ? "/" : (ga4blogger.path + "/");
 
+				if (ga4blogger.track_postview()) {
+					var posts = jQuery(ga4blogger_track_postview);
+					if (posts.size() === 0){
+						window._gaq.push(['_trackPageview']);
+						_track_error_event("jQuery('"+ga4blogger_track_postview+"').size() IS zero IN " + ga4blogger.path);
+					} else {
+						posts.appear(function() {
+							window._gaq.push(['_trackPageview', ga4blogger.str2link(jQuery(this).attr('href')).pathname]);
+						});
+					}
+				}
 				jQuery.expr[':'].external = function (obj) {
 					return (obj.hostname && obj.hostname !== ga4blogger.host);
 				};
@@ -99,11 +114,6 @@ var ga4blogger = {
 					hash = "(" + ga4blogger.get_text(this) + ") " + hash;
 					window._gaq.push(['_trackEvent', 'Hash Link', ga4blogger.path, hash]);
 				});
-				if (ga4blogger.track_postview()) {
-					jQuery(ga4blogger_track_postview).appear(function() {
-						window._gaq.push(['_trackPageview', ga4blogger.str2link(jQuery(this).attr('href')).pathname]);
-					});
-				}
 			} catch (e) {
 				_track_error_event(e);
 			}
@@ -136,12 +146,12 @@ var ga4blogger = {
 		script_aux.parentNode.insertBefore(script, script_aux);
 	},
 
-	prepare_selectors : function (){
+	prepare_selectors : function () {
 		if (ga4blogger.track_postview()) {
-			// jQuery.appear v1.1.1
-			(function($){$.fn.appear=function(f,o){var s=$.extend({one:true},o);return this.each(function(){var t=$(this);t.appeared=false;if(!f){t.trigger('appear',s.data);return;}var w=$(window);var c=function(){if(!t.is(':visible')){t.appeared=false;return;}var a=w.scrollLeft();var b=w.scrollTop();var o=t.offset();var x=o.left;var y=o.top;if(y+t.height()>=b||y<=b+w.height()&&x+t.width()>=a&&x<=a+w.width()){if(!t.appeared)t.trigger('appear',s.data);}else{t.appeared=false;}};var m=function(){t.appeared=true;if(s.one){w.unbind('scroll',c);var i=$.inArray(c,$.fn.appear.checks);if(i>=0)$.fn.appear.checks.splice(i,1);}f.apply(this,arguments);};if(s.one)t.one('appear',s.data,m);else t.bind('appear',s.data,m);w.scroll(c);$.fn.appear.checks.push(c);(c)();});};$.extend($.fn.appear,{checks:[],timeout:null,checkAll:function(){var l=$.fn.appear.checks.length;if(l>0)while(l--)($.fn.appear.checks[l])();},run:function(){if($.fn.appear.timeout)clearTimeout($.fn.appear.timeout);$.fn.appear.timeout=setTimeout($.fn.appear.checkAll,20);}});$.each(['append','prepend','after','before','attr','removeAttr','addClass','removeClass','toggleClass','remove','css','show','hide'],function(i,n){var u=$.fn[n];if(u){$.fn[n]=function(){var r=u.apply(this,arguments);$.fn.appear.run();return r;}}});})(jQuery);
+			(function(a){a.fn.appear=function(d,b){var e=a.extend({data:void 0,one:!0},b);return this.each(function(){var c=a(this);c.appeared=!1;if(d){var g=a(window),f=function(){if(c.is(":visible")){var a=g.scrollLeft(),d=g.scrollTop(),b=c.offset(),f=b.left,b=b.top;b+c.height()>=d&&b<=d+g.height()&&f+c.width()>=a&&f<=a+g.width()?c.appeared||c.trigger("appear",e.data):c.appeared=!1}else c.appeared=!1},b=function(){c.appeared=!0;if(e.one){g.unbind("scroll",f);var b=a.inArray(f,a.fn.appear.checks);
+			b>=0&&a.fn.appear.checks.splice(b,1)}d.apply(this,arguments)};if(e.one)c.one("appear",e.data,b);else c.bind("appear",e.data,b);g.scroll(f);a.fn.appear.checks.push(f);f()}else c.trigger("appear",e.data)})};a.extend(a.fn.appear,{checks:[],timeout:null,checkAll:function(){var d=a.fn.appear.checks.length;if(d>0)for(;d--;)a.fn.appear.checks[d]()},run:function(){a.fn.appear.timeout&&clearTimeout(a.fn.appear.timeout);a.fn.appear.timeout=setTimeout(a.fn.appear.checkAll,20)}});
+			a.each(["append","prepend","after","before","attr","removeAttr","addClass","removeClass","toggleClass","remove","css","show","hide"],function(d,b){var e=a.fn[b];e&&(a.fn[b]=function(){var b=e.apply(this,arguments);a.fn.appear.run();return b})})})(jQuery);
 		}
-
 		ga4blogger.apply_selector();
 	}
 };
